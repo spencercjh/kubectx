@@ -30,8 +30,6 @@ jobs:
         run: test -z "$(gofmt -s -d .)"
       - name: Ensure go.mod is already tidied
         run: go mod tidy
-      - name: Run unit tests
-        run: go test ./...
       - name: Build with Goreleaser
         uses: goreleaser/goreleaser-action@v1
         with:
