@@ -10,29 +10,25 @@ sshctx is a utility to switch between ssh(1) hosts.
 
 ```
 USAGE:
-  kubectx                   : list the contexts
-  kubectx <NAME>            : switch to context <NAME>
-  kubectx -                 : switch to the previous context
-  kubectx -c, --current     : show the current context name
-  kubectx <NEW_NAME>=<NAME> : rename context <NAME> to <NEW_NAME>
-  kubectx <NEW_NAME>=.      : rename current-context to <NEW_NAME>
-  kubectx -d <NAME>         : delete context <NAME> ('.' for current-context)
-                              (this command won't delete the user/cluster entry
-                              that is used by the context)
-  kubectx -u, --unset       : unset the current context
+  sshctx                       : list the hosts
+  sshctx <HOST>                : connect to <HOST>
+  sshctx -                     : connect to the previous successfully connected host
+  sshctx -p, --previous        : show the previous successfully connected host
+  sshctx -h,--help             : show this message
+  sshctx -v,-V,--version       : show version
 ```
 
 ### Usage
 
 ```sh
+$ sshctx
+List hosts in `~/.ssh/config`
+
 $ sshctx 192.168.1.2
 Connect to context `192.168.1.2`.
 
 $ sshctx -
 Connect to context `192.168.1.2`.
 ```
-
-`sshctx` supports <kbd>Tab</kbd> completion on bash/zsh/fish shells to help with long host names. You don't have to
-remember full host names anymore.
 
 -----

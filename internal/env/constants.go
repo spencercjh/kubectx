@@ -21,7 +21,7 @@ var SSHParameterRegexp = regexp.MustCompile(`(?m)^(\w+)@((?:1[0-9][0-9]\.|2[0-4]
 const (
 	// FZFIgnore describes the environment variable to set to disable
 	// interactive context selection when fzf is installed.
-	FZFIgnore = "KUBECTX_IGNORE_FZF"
+	FZFIgnore = "SSHCTX_IGNORE_FZF"
 
 	// NoColor describes the environment variable to disable color usage
 	// when printing current context in a list.
@@ -29,7 +29,7 @@ const (
 
 	// ForceColor describes the "internal" environment variable to force
 	// color usage to show current context in a list.
-	ForceColor = `_KUBECTX_FORCE_COLOR`
+	ForceColor = `_SSHCTX_FORCE_COLOR`
 
 	// Debug describes the internal environment variable for more verbose logging.
 	Debug = `DEBUG`
