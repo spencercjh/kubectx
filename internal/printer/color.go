@@ -15,8 +15,8 @@
 package printer
 
 import (
+	"github.com/spencercjh/sshctx/internal/env"
 	"os"
-	"sshctx/internal/env"
 
 	"github.com/fatih/color"
 )

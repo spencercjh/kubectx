@@ -16,9 +16,9 @@ package cmdutil
 
 import (
 	"github.com/mattn/go-isatty"
+	"github.com/spencercjh/sshctx/internal/env"
 	"os"
 	"os/exec"
-	"sshctx/internal/env"
 )
 
 // isTerminal determines if given fd is a TTY.

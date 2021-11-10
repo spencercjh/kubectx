@@ -15,21 +15,23 @@
 package main
 
 import (
-	"github.com/spencercjh/sshctx/internal/printer"
-	"io"
-	"os"
-
-	"github.com/fatih/color"
+	"bytes"
+	"strings"
+	"testing"
 )
 
-type Op interface {
-	Run(stdout, stderr io.Writer) error
-}
+func TestPrintHelp(t *testing.T) {
+	var buf bytes.Buffer
+	if err := (&HelpOp{}).Run(&buf, &buf); err != nil {
+		t.Fatal(err)
+	}
 
-func main() {
-	op := parseArgs(os.Args[1:])
-	if err := op.Run(color.Output, color.Error); err != nil {
-		_ = printer.Error(color.Error, err.Error())
-		defer os.Exit(1)
+	out := buf.String()
+	if !strings.Contains(out, "USAGE:") {
+		t.Errorf("help string doesn't contain USAGE: ; output=\"%s\"", out)
+	}
+
+	if !strings.HasSuffix(out, "\n") {
+		t.Errorf("does not end with New line; output=\"%s\"", out)
 	}
 }

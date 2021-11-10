@@ -2,10 +2,10 @@ package sshconfig
 
 import (
 	"errors"
+	"github.com/spencercjh/sshctx/internal/env"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sshctx/internal/env"
 	"testing"
 )
 

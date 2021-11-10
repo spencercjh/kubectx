@@ -18,12 +18,12 @@ import (
 	"facette.io/natsort"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/spencercjh/sshctx/internal/env"
+	"github.com/spencercjh/sshctx/internal/printer"
+	"github.com/spencercjh/sshctx/internal/sshconfig"
 	"io"
 	"os"
 	"sort"
-	"sshctx/internal/env"
-	"sshctx/internal/printer"
-	"sshctx/internal/sshconfig"
 )
 
 // ListOp describes listing contexts.

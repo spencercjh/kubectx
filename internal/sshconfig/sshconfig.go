@@ -16,10 +16,10 @@ package sshconfig
 
 import (
 	"bufio"
+	"github.com/spencercjh/sshctx/internal/printer"
 	"gopkg.in/yaml.v3"
 	"io"
 	"os"
-	"sshctx/internal/printer"
 	"strconv"
 	"strings"
 

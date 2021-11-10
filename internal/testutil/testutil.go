@@ -12,24 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package testutil
 
-import (
-	"github.com/spencercjh/sshctx/internal/printer"
-	"io"
-	"os"
+import "os"
 
-	"github.com/fatih/color"
-)
-
-type Op interface {
-	Run(stdout, stderr io.Writer) error
-}
-
-func main() {
-	op := parseArgs(os.Args[1:])
-	if err := op.Run(color.Output, color.Error); err != nil {
-		_ = printer.Error(color.Error, err.Error())
-		defer os.Exit(1)
+// WithEnvVar sets an env var temporarily. Call its return value
+// in defer to restore original value in env (if exists).
+func WithEnvVar(key, value string) func() {
+	orig, ok := os.LookupEnv(key)
+	_ = os.Setenv(key, value)
+	return func() {
+		if ok {
+			_ = os.Setenv(key, orig)
+		} else {
+			_ = os.Unsetenv(key)
+		}
 	}
 }
