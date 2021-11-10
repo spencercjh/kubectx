@@ -33,11 +33,13 @@ builds:
       - arm64
       - ppc64le
       - s390x
-  goarm: [ 6, 7 ]
+    goarm:
+      - "6"
+      - "7"
 archives:
   - id: sshctx-archive
     name_template: |-
-      kubectx_{{ .Tag }}_{{ .Os }}_{{ .Arch -}}
+      sshctx_{{ .Tag }}_{{ .Os }}_{{ .Arch -}}
       {{- with .Arm -}}
         {{- if (eq . "6") -}}hf
         {{- else -}}v{{- . -}}
@@ -48,13 +50,10 @@ archives:
     replacements:
       386: i386
       amd64: x86_64
-  format_overrides:
-    - goos: windows
-      format: zip
-  files: [ "LICENSE" ]
+    format_overrides:
+      - goos: windows
+        format: zip
+    files: [ "LICENSE" ]
 checksum:
   name_template: "checksums.txt"
   algorithm: sha256
-release:
-  extra_files:
-    - glob: ./sshctx
