@@ -1,0 +1,82 @@
+
+Host prme-nsx-perf-009
+    Hostname 10.115.40.98
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-008
+    Hostname 10.115.40.97
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-007
+    Hostname 10.115.40.96
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-006
+    Hostname 10.115.40.95
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-005
+    Hostname 10.115.40.94
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-004
+    Hostname 10.115.40.93
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-003
+    Hostname 10.115.40.160
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-002
+    Hostname 10.115.40.159
+    User root
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config prme-nsx-perf-001 -W %h:%p
+    ForwardAgent yes
+Host prme-nsx-perf-001
+    Hostname localhost
+    User root
+    Port 19999
+    IdentityFile ./keys/vmw_prme_rsa
+    ProxyCommand ssh -F ./ssh_config aws-jumphost -W %h:%p
+    ForwardAgent yes
+Host aws-jumphost
+    Hostname 13.56.245.4
+    User ubuntu
+    IdentityFile ./keys/aws_jumphost.pem
+    ProxyCommand ssh -F ./ssh_config mshahbaz-poweredge-1-pve -W %h:%p
+    ForwardAgent yes
+Host mshahbaz-poweredge-1-pve
+    Hostname 128.112.168.26
+    User root
+    IdentityFile ./keys/pu_pve_rsa
+    ForwardAgent yes
+Host prme-nsx-perf-001-k8s
+    Hostname prme-nsx-perf-001
+    LocalForward 8888 12.34.56.78:8000
+# illegal parts
+abc asd asd ad
+asdasdda asdasd
+# empty
+Host
+    Hostname
+    User root
+# *
+Host *
+    IdentityFile ./keys/aws_jumphost.pem
+    ProxyCommand ssh -F ./ssh_config mshahbaz-poweredge-1-pve -W %h:%p
+    ForwardAgent yes

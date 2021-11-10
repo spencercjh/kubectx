@@ -17,6 +17,8 @@ package printer
 import (
 	"fmt"
 	"io"
+	"os"
+	"sshctx/internal/env"
 
 	"github.com/fatih/color"
 )
@@ -49,8 +51,11 @@ func Error(w io.Writer, format string, args ...interface{}) error {
 }
 
 func Warning(w io.Writer, format string, args ...interface{}) error {
-	_, err := fmt.Fprintf(w, WarningColor.Sprint("warning: ")+format+"\n", args...)
-	return err
+	if _, ok := os.LookupEnv(env.Debug); ok {
+		_, err := fmt.Fprintf(w, WarningColor.Sprint("warning: ")+format+"\n", args...)
+		return err
+	}
+	return nil
 }
 
 func Success(w io.Writer, format string, args ...interface{}) error {

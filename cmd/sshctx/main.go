@@ -12,29 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cmdutil
+package main
 
 import (
-	"github.com/mattn/go-isatty"
+	"io"
 	"os"
-	"os/exec"
-	"sshctx/internal/env"
+	"sshctx/internal/printer"
+
+	"github.com/fatih/color"
 )
 
-// isTerminal determines if given fd is a TTY.
-func isTerminal(fd *os.File) bool {
-	return isatty.IsTerminal(fd.Fd())
+type Op interface {
+	Run(stdout, stderr io.Writer) error
 }
 
-// fzfInstalled determines if fzf(1) is in PATH.
-func fzfInstalled() bool {
-	v, _ := exec.LookPath("fzf")
-
-	return v != ""
-}
-
-// IsInteractiveMode determines if we can do choosing with fzf.
-func IsInteractiveMode(stdout *os.File) bool {
-	v := os.Getenv(env.FZFIgnore)
-	return v == "" && isTerminal(stdout) && fzfInstalled()
+func main() {
+	op := parseArgs(os.Args[1:])
+	if err := op.Run(color.Output, color.Error); err != nil {
+		_ = printer.Error(color.Error, err.Error())
+		defer os.Exit(1)
+	}
 }

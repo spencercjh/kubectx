@@ -14,19 +14,26 @@
 
 package env
 
+import "regexp"
+
+var SSHParameterRegexp = regexp.MustCompile(`(?m)^(\w+)@((?:1[0-9][0-9]\.|2[0-4][0-9]\.|25[0-5]\.|[1-9][0-9]\.|[0-9]\.){3}(?:1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])+|\w+[^\s]+\.[^\s]+)+:(\d+)$`)
+
 const (
-	// EnvFZFIgnore describes the environment variable to set to disable
+	// FZFIgnore describes the environment variable to set to disable
 	// interactive context selection when fzf is installed.
-	EnvFZFIgnore = "KUBECTX_IGNORE_FZF"
+	FZFIgnore = "KUBECTX_IGNORE_FZF"
 
-	// EnvForceColor describes the environment variable to disable color usage
+	// NoColor describes the environment variable to disable color usage
 	// when printing current context in a list.
-	EnvNoColor = `NO_COLOR`
+	NoColor = `NO_COLOR`
 
-	// EnvForceColor describes the "internal" environment variable to force
+	// ForceColor describes the "internal" environment variable to force
 	// color usage to show current context in a list.
-	EnvForceColor = `_KUBECTX_FORCE_COLOR`
+	ForceColor = `_KUBECTX_FORCE_COLOR`
 
-	// EnvDebug describes the internal environment variable for more verbose logging.
-	EnvDebug = `DEBUG`
+	// Debug describes the internal environment variable for more verbose logging.
+	Debug = `DEBUG`
+
+	// StrictMode describes the internal environment to force host name with SSHParameterRegexp
+	StrictMode = `STRICT_MODE`
 )

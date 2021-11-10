@@ -16,10 +16,9 @@ package printer
 
 import (
 	"os"
+	"sshctx/internal/env"
 
 	"github.com/fatih/color"
-
-	"github.com/ahmetb/kubectx/internal/env"
 )
 
 var (
@@ -35,9 +34,9 @@ func init() {
 // which is determined based on factors like if stdout is tty.
 func useColors() *bool {
 	tr, fa := true, false
-	if os.Getenv(env.EnvForceColor) != "" {
+	if os.Getenv(env.ForceColor) != "" {
 		return &tr
-	} else if os.Getenv(env.EnvNoColor) != "" {
+	} else if os.Getenv(env.NoColor) != "" {
 		return &fa
 	}
 	return nil
