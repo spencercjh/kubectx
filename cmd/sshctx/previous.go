@@ -15,9 +15,9 @@
 package main
 
 import (
+	"github.com/spencercjh/sshctx/internal/printer"
+	"github.com/spencercjh/sshctx/internal/sshconfig"
 	"io"
-	"sshctx/internal/printer"
-	"sshctx/internal/sshconfig"
 
 	"github.com/pkg/errors"
 )

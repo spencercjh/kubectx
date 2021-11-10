@@ -2,10 +2,11 @@ package sshconfig
 
 import (
 	"errors"
+	"github.com/spencercjh/sshctx/internal/env"
+	"github.com/spencercjh/sshctx/internal/testutil"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"sshctx/internal/env"
 	"testing"
 )
 
@@ -54,6 +55,9 @@ func TestGetSSHCtxDataPath(t *testing.T) {
 }
 
 func Test_getSSHConfigPath(t *testing.T) {
+	testutil.SetupSSHConfig(t)
+	defer testutil.TearDownSSHConfig()
+
 	tests := []struct {
 		name    string
 		want    string
@@ -233,7 +237,8 @@ func TestStandardLoader_LoadSSHCTXData(t *testing.T) {
 
 func TestStandardLoader_LoadSSHConfig(t *testing.T) {
 	t.Setenv(env.Debug, "true")
-
+	testutil.SetupSSHConfig(t)
+	defer testutil.TearDownSSHConfig()
 	defaultSSHConfigPath, _ := getSSHConfigPath()
 	if _, err := os.Stat(defaultSSHConfigPath); err == nil {
 		// ~/.ssh/config exist

@@ -16,9 +16,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/spencercjh/sshctx/internal/cmdutil"
 	"io"
 	"os"
-	"sshctx/internal/cmdutil"
 	"strings"
 )
 

@@ -16,11 +16,11 @@ package sshconfig
 
 import (
 	"fmt"
+	"github.com/spencercjh/sshctx/internal/cmdutil"
+	"github.com/spencercjh/sshctx/internal/printer"
 	"io"
 	"os"
 	"path/filepath"
-	"sshctx/internal/cmdutil"
-	"sshctx/internal/printer"
 
 	"github.com/pkg/errors"
 )

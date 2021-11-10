@@ -17,12 +17,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"github.com/spencercjh/sshctx/internal/env"
+	"github.com/spencercjh/sshctx/internal/printer"
+	"github.com/spencercjh/sshctx/internal/sshconfig"
 	"io"
 	"os"
 	"os/exec"
-	"sshctx/internal/env"
-	"sshctx/internal/printer"
-	"sshctx/internal/sshconfig"
 	"strings"
 
 	"github.com/pkg/errors"
