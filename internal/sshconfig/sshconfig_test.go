@@ -2,6 +2,7 @@ package sshconfig
 
 import (
 	"errors"
+	"github.com/spencercjh/sshctx/internal/testutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -33,6 +34,9 @@ func TestHost_ToSSHParameter(t *testing.T) {
 }
 
 func TestSSHConfig_Parse(t *testing.T) {
+	testutil.SetupSSHConfig(t)
+	defer testutil.TearDownSSHConfig()
+
 	sc := new(SSHConfig).WithLoader(DefaultLoader)
 
 	tests := []struct {
@@ -61,6 +65,9 @@ func TestSSHConfig_Parse(t *testing.T) {
 }
 
 func TestSSHConfig_Parse_withSpecific(t *testing.T) {
+	testutil.SetupSSHConfig(t)
+	defer testutil.TearDownSSHConfig()
+
 	t.Run("specific-sshconfig-and-sshctx-data", func(t *testing.T) {
 		sshconfigPath := filepath.Join(cwd, "..", "..", "test", "ssh-config-example")
 		t.Setenv("SSHCONFIG", sshconfigPath)
@@ -220,6 +227,9 @@ func TestSSHConfig_Parse_withSpecific(t *testing.T) {
 }
 
 func TestSSHConfig_Close(t *testing.T) {
+	testutil.SetupSSHConfig(t)
+	defer testutil.TearDownSSHConfig()
+
 	sc := new(SSHConfig).WithLoader(DefaultLoader)
 	_ = sc.Parse()
 
