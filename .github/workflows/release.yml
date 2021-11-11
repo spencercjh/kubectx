@@ -38,5 +38,5 @@ jobs:
       uses: chyroc/upgrade-brew-tap@v0.24.0
       with:
         name: sshctx
-        tap_repo: https://github.com/spencercjh/homebrew-sshctx
+        tap_repo: spencercjh/homebrew-sshctx
         token: ${{ secrets.GITHUB_TOKEN }}
