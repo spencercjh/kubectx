@@ -4,6 +4,8 @@ This repository provides `sshctx` tool.
 
 **`sshctx`** helps you switch between hosts back and forth.
 
+[Install &rarr;](#Installation)
+
 # sshctx(1)
 
 sshctx is a utility to switch between ssh(1) hosts.
@@ -35,3 +37,29 @@ Show the latest connected host
 ```
 
 -----
+
+## Installation
+
+### Macos
+
+Distribution with Homebrew: [Formula](https://github.com/spencercjh/homebrew-sshctx)
+
+```shell
+brew tap spencercjh/sshctx
+
+brew install sshctx
+
+brew upgrade sshctx
+```
+
+### Linux
+
+```shell
+$ TBD
+```
+
+### Windows
+
+```shell
+$ TDB
+```

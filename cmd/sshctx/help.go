@@ -36,7 +36,7 @@ func printUsage(out io.Writer) error {
   %PROG% -                     : connect to the previous successfully connected host
   %PROG% -p, --previous        : show the previous successfully connected host
   %PROG% -h,--help             : show this message
-  %PROG% -v,-V,--version          : show version`
+  %PROG% -v,-V,--version       : show version`
 	help = strings.ReplaceAll(help, "%PROG%", selfName())
 
 	_, err := fmt.Fprintf(out, "%s\n", help)
