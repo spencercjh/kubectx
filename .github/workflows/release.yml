@@ -34,3 +34,8 @@ jobs:
         args: release --rm-dist
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: upgrade-brew-tap
+      uses: chyroc/upgrade-brew-tap@v0.24.0
+      with:
+        name: sshctx
+        token: ${{ secrets.GITHUB_TOKEN }}
