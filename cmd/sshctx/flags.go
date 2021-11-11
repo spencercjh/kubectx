@@ -33,8 +33,11 @@ func (op UnsupportedOp) Run(_, _ io.Writer) error {
 // and decides which operation should be taken.
 func parseArgs(argv []string) Op {
 	if len(argv) == 0 {
-		if cmdutil.IsInteractiveMode(os.Stdout) {
-			return InteractiveSwitchOp{SelfCmd: os.Args[0]}
+		if cmdutil.UseFzf(os.Stdout) {
+			return FzfOp{SelfCmd: os.Args[0]}
+		}
+		if cmdutil.UsePromptui(os.Stdout) {
+			return PromptuiOp{}
 		}
 		return ListOp{}
 	}

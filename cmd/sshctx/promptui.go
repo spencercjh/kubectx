@@ -15,25 +15,23 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
+	"facette.io/natsort"
+	"github.com/manifoldco/promptui"
+	"github.com/pkg/errors"
 	"github.com/spencercjh/sshctx/internal/env"
+	"github.com/spencercjh/sshctx/internal/printer"
 	"github.com/spencercjh/sshctx/internal/sshconfig"
 	"io"
 	"os"
-	"os/exec"
+	"sort"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
-type FzfOp struct {
-	SelfCmd string
-}
+type PromptuiOp struct{}
 
-func (op FzfOp) Run(stdout, stderr io.Writer) error {
-	// parse sshconfig just to see if it can be loaded
+func (op PromptuiOp) Run(stdout, stderr io.Writer) error {
 	sc := new(sshconfig.SSHConfig).WithLoader(sshconfig.DefaultLoader)
+
 	defer func(sshConfig *sshconfig.SSHConfig) {
 		_ = sshConfig.Close()
 	}(sc)
@@ -42,22 +40,35 @@ func (op FzfOp) Run(stdout, stderr io.Writer) error {
 		return errors.Wrap(err, "sshconfig error")
 	}
 
-	cmd := exec.Command("fzf", "--ansi", "--no-preview")
-	var out bytes.Buffer
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = stderr
-	cmd.Stdout = &out
+	sort.SliceStable(sc.Hosts, func(i, j int) bool {
+		return natsort.Compare(sc.Hosts[i].Host, sc.Hosts[j].Host)
+	})
 
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("FZF_DEFAULT_COMMAND=%s", op.SelfCmd),
-		fmt.Sprintf("%s=1", env.ForceColor))
-	if err := cmd.Run(); err != nil {
-		var exitError *exec.ExitError
-		if ok := errors.Is(err, exitError); !ok {
-			return err
+	items := []string{}
+	for _, h := range sc.Hosts {
+		str := h.ToSSHParameter()
+		_, ok := os.LookupEnv(env.StrictMode)
+		if ok && !env.SSHParameterRegexp.MatchString(str) {
+			_ = printer.Warning(stdout, "%s is an illegal ssh parameter", str)
+			continue
 		}
+		str = "💻: " + h.DisplayName + "#" + str
+		if h == sc.PreviousHost {
+			str = printer.ActiveItemColor.Sprint(str)
+		}
+		items = append(items, str)
 	}
-	choice := strings.TrimSpace(out.String())
+
+	prompt := promptui.Select{
+		Label: "Select a host to connect",
+		Items: items,
+	}
+	_, result, err := prompt.Run()
+
+	if err != nil {
+		return errors.Wrap(err, "promptui error")
+	}
+	choice := strings.TrimSpace(result)
 	if choice == "" {
 		return errors.New("you did not choose any of the options")
 	}
