@@ -15,9 +15,9 @@ func TestHost_ToSSHParameter(t *testing.T) {
 		host Host
 		want string
 	}{
-		{name: "ipv4", host: Host{Host: "192.168.1.1", Username: "test", Port: 22}, want: "test@192.168.1.1:22"},
-		{name: "domain", host: Host{Host: "test.com", Username: "test", Port: 22}, want: "test@test.com:22"},
-		{name: "localhost", host: Host{Host: "localhost", Username: "test", Port: 22}, want: "test@localhost:22"},
+		{name: "ipv4", host: Host{Host: "192.168.1.1", Username: "test", Port: 22}, want: "test@192.168.1.1 -p 22"},
+		{name: "domain", host: Host{Host: "test.com", Username: "test", Port: 22}, want: "test@test.com -p 22"},
+		{name: "localhost", host: Host{Host: "localhost", Username: "test", Port: 22}, want: "test@localhost -p 22"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

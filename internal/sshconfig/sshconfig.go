@@ -41,13 +41,17 @@ type SSHConfig struct {
 }
 
 type Host struct {
-	Host     string
-	Username string
-	Port     int
+	Host        string
+	DisplayName string
+	Username    string
+	Port        int
 }
 
 func (h *Host) ToSSHParameter() string {
-	return h.Username + "@" + h.Host + ":" + strconv.Itoa(h.Port)
+	if h.Port > 0 {
+		return h.Username + "@" + h.Host + " -p " + strconv.Itoa(h.Port)
+	}
+	return h.Username + "@" + h.Host
 }
 
 var EmptyHost = Host{}
@@ -155,11 +159,11 @@ func extractConfigItem(itemBeginIndex int, itemEndIndex int, rows []string) Host
 	var hostname string
 	for k := itemBeginIndex; k < itemEndIndex; k++ {
 		itemRow := rows[k]
-		if strings.HasPrefix(itemRow, "Host") {
-			host = strings.TrimSpace(itemRow[4:])
+		if strings.HasPrefix(itemRow, "Host ") {
+			host = strings.TrimSpace(itemRow[5:])
 		}
-		if strings.HasPrefix(itemRow, "Hostname") {
-			hostname = strings.TrimSpace(itemRow[8:])
+		if strings.HasPrefix(itemRow, "Hostname ") {
+			hostname = strings.TrimSpace(itemRow[9:])
 		}
 		if strings.HasPrefix(itemRow, "User") {
 			configItem.Username = strings.TrimSpace(itemRow[4:])
@@ -168,10 +172,18 @@ func extractConfigItem(itemBeginIndex int, itemEndIndex int, rows []string) Host
 			configItem.Port, _ = strconv.Atoi(strings.TrimSpace(itemRow[4:]))
 		}
 	}
-	if hostname != "" {
+	switch {
+	case host == "" && hostname != "":
 		configItem.Host = hostname
-	} else if host != "" {
+		configItem.DisplayName = hostname
+	case host != "" && hostname == "":
 		configItem.Host = host
+		configItem.DisplayName = host
+	case host != "" && host != "name" && host != "*" && hostname != "":
+		configItem.Host = hostname
+		configItem.DisplayName = host
+	default:
+		return EmptyHost
 	}
 	// no host and hostname
 	if configItem.Host == "name" ||
@@ -183,9 +195,6 @@ func extractConfigItem(itemBeginIndex int, itemEndIndex int, rows []string) Host
 	}
 	if configItem.Username == "" {
 		configItem.Username = os.Getenv("USER")
-	}
-	if configItem.Port == 0 {
-		configItem.Port = 22
 	}
 	return configItem
 }
@@ -223,6 +232,7 @@ func previousConfig(rootNode *yaml.Node) (Host, error) {
 	host := Host{}
 	host.Host = valueOf(previous, "host").Value
 	host.Username = valueOf(previous, "username").Value
+	host.DisplayName = valueOf(previous, "displayname").Value
 	port, err := strconv.Atoi(valueOf(previous, "port").Value)
 	if err != nil {
 		return EmptyHost, errors.Wrap(err, "Can't parse port in the previous node")

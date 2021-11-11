@@ -51,6 +51,7 @@ func (op ListOp) Run(stdout, _ io.Writer) error {
 			_ = printer.Warning(stdout, "%s is an illegal ssh parameter", str)
 			continue
 		}
+		str = "💻: " + h.DisplayName + "#" + str
 		if h == sc.PreviousHost {
 			str = printer.ActiveItemColor.Sprint(str)
 		}

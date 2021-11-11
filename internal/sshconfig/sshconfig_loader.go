@@ -70,10 +70,12 @@ func (*StandardLoader) LoadSSHCTXData() (io.ReadWriteCloser, error) {
 			}
 			// try to create sshctxData
 			file, err = os.Create(defaultPath)
-			_ = os.Chmod(defaultPath, 0777)
-			// TODO: consider to ignore the error
 			if err != nil {
 				return nil, errors.Wrap(err, fmt.Sprintf("Can't create sshctxData file: %s", defaultPath))
+			}
+			err = os.Chmod(defaultPath, 0777)
+			if err != nil {
+				return nil, errors.Wrap(err, fmt.Sprintf("Can't chmod sshctxData file : %s", defaultPath))
 			}
 		}
 	}

@@ -15,7 +15,8 @@
 package main
 
 import (
-	"bytes"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/spencercjh/sshctx/internal/env"
 	"github.com/spencercjh/sshctx/internal/printer"
 	"github.com/spencercjh/sshctx/internal/sshconfig"
@@ -25,8 +26,8 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-
-	"github.com/pkg/errors"
+	"strings"
+	"sync"
 )
 
 // SwitchOp indicates intention to switch contexts.
@@ -34,61 +35,104 @@ type SwitchOp struct {
 	Target string // '-' for back and forth, or NAME
 }
 
-func (op SwitchOp) Run(_, stderr io.Writer) error {
-	var target string
+func (op SwitchOp) Run(stdout, stderr io.Writer) error {
+	var displayName string
+	var sshPara string
 	var err error
 	if op.Target == "-" {
-		target, err = connectPrevious(stderr)
+		displayName, sshPara, err = connectPrevious(stderr)
 	} else {
-		target, err = connectTarget(op.Target, stderr)
+		displayName, sshPara, err = connectTarget(op.Target, stderr)
 	}
 	if err != nil {
 		return errors.Wrap(err, "failed to connect host")
 	}
-	// save previous host
-	e := savePreviousHost(target)
-	if e != nil {
-		return errors.Wrap(e, "failed to save previous host")
+	if err := savePreviousHost(stdout, displayName, sshPara); err != nil {
+		return errors.Wrap(err, "failed to save previous host")
 	}
 	return nil
 }
 
-func savePreviousHost(target string) error {
-	matches := env.SSHParameterRegexp.FindStringSubmatch(target)
-	port, _ := strconv.Atoi(matches[2])
-	var host = map[string]sshconfig.Host{"previous": {matches[1], matches[0], port}}
+func deleteEmpty(s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
+}
+
+func savePreviousHost(stdin io.Writer, displayName, sshPara string) error {
+	matches := env.SSHParameterRegexp.FindStringSubmatch(sshPara)
+	matches = deleteEmpty(matches)
+	var host map[string]sshconfig.Host
+	switch {
+	case len(matches) == 5:
+		port, _ := strconv.Atoi(matches[4])
+		host = map[string]sshconfig.Host{"previous": {Host: matches[2], DisplayName: displayName, Username: matches[1], Port: port}}
+	case len(matches) == 3:
+		host = map[string]sshconfig.Host{"previous": {Host: matches[2], DisplayName: displayName, Username: matches[1]}}
+	default:
+		return fmt.Errorf("illegal SSH parameter: %s", sshPara)
+	}
+
 	data, err := yaml.Marshal(&host)
 
 	if err != nil {
-		return errors.Wrap(err, "failed to marshal host")
+		return errors.Wrap(err, fmt.Sprintf("failed to marshal host: %v", host))
 	}
 
 	sshCtxDataPath, _ := sshconfig.GetSSHCtxDataPath()
-	if err := ioutil.WriteFile(sshCtxDataPath, data, 0); err != nil {
+	if err := ioutil.WriteFile(sshCtxDataPath, data, 0666); err != nil {
 		return errors.Wrap(err, "failed to write host to sshctxData file")
 	}
+	_ = printer.Success(stdin, "Saved previous host successfully: %v", host)
 	return nil
 }
 
-// connectTarget switches to specified context name.
-func connectTarget(target string, stderr io.Writer) (string, error) {
-	_ = printer.Success(stderr, "Switched to target \"%s\".", printer.SuccessColor.Sprint(target))
-	cmd := exec.Command("ssh", target)
-	var out bytes.Buffer
-	cmd.Stdin = os.Stdin
-	cmd.Stderr = stderr
-	cmd.Stdout = &out
-	if err := cmd.Run(); err != nil {
-		var exitError *exec.ExitError
-		if ok := errors.Is(err, exitError); !ok {
-			return target, err
-		}
+// extract
+func extract(target string) (string, string, error) {
+	sshParaBeginIndex := strings.IndexAny(target, "#")
+	if sshParaBeginIndex == -1 {
+		return "", "", errors.New("invalid target")
 	}
-	return target, nil
+	displayName := target[:sshParaBeginIndex]
+	sshPara := target[sshParaBeginIndex+1:]
+	return displayName, sshPara, nil
+}
+
+// connectTarget
+func connectTarget(target string, stderr io.Writer) (string, string, error) {
+	displayName, sshPara, err := extract(target)
+	if err != nil {
+		return "", "", err
+	}
+	return connectTargetWithDisplayName(displayName, sshPara, stderr)
+}
+
+// connectTargetWithDisplayName
+func connectTargetWithDisplayName(displayName string, sshPara string, stderr io.Writer) (string, string, error) {
+	_ = printer.Success(stderr, "Switched to target %s.", printer.SuccessColor.Sprint(displayName))
+
+	var waitGroup sync.WaitGroup
+	waitGroup.Add(1)
+	go func() {
+		cmd := exec.Command("ssh", "-t", "-t", sshPara)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = stderr
+		if err := cmd.Run(); err != nil {
+			_ = printer.Error(stderr, "Failed to connect to target %s because: %v.", printer.ErrorColor.Sprint(displayName), err)
+		}
+		waitGroup.Done()
+	}()
+	waitGroup.Wait()
+	return displayName, sshPara, nil
 }
 
 // connectPrevious switches to previously switch context.
-func connectPrevious(stderr io.Writer) (string, error) {
+func connectPrevious(stderr io.Writer) (string, string, error) {
 	sc := new(sshconfig.SSHConfig).WithLoader(sshconfig.DefaultLoader)
 
 	defer func(sshConfig *sshconfig.SSHConfig) {
@@ -96,12 +140,12 @@ func connectPrevious(stderr io.Writer) (string, error) {
 	}(sc)
 
 	if err := sc.Parse(); err != nil {
-		return "", errors.Wrap(err, "sshconfig error")
+		return "", "", errors.Wrap(err, "sshconfig error")
 	}
 
 	if sc.PreviousHost == sshconfig.EmptyHost {
-		return "", errors.New("No previous host")
+		return "", "", errors.New("No previous host")
 	}
 
-	return connectTarget(sc.PreviousHost.ToSSHParameter(), stderr)
+	return connectTargetWithDisplayName(sc.PreviousHost.DisplayName, sc.PreviousHost.ToSSHParameter(), stderr)
 }
