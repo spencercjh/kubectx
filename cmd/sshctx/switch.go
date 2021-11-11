@@ -32,7 +32,7 @@ import (
 
 // SwitchOp indicates intention to switch contexts.
 type SwitchOp struct {
-	Target string // '-' for back and forth, or NAME
+	Target string // - or DisplayName or `💻: DisplayName#user@host`
 }
 
 func (op SwitchOp) Run(stdout, stderr io.Writer) error {
@@ -84,35 +84,65 @@ func savePreviousHost(stdin io.Writer, displayName, sshPara string) error {
 	}
 
 	sshCtxDataPath, _ := sshconfig.GetSSHCtxDataPath()
-	if err := ioutil.WriteFile(sshCtxDataPath, data, 0666); err != nil {
+	if err := ioutil.WriteFile(sshCtxDataPath, data, 0600); err != nil {
 		return errors.Wrap(err, "failed to write host to sshctxData file")
 	}
 	_ = printer.Success(stdin, "Saved previous host successfully: %v", host)
 	return nil
 }
 
-// extract
+// extract displayName and sshPara from `💻: DisplayName#SSHPara`
 func extract(target string) (string, string, error) {
 	sshParaBeginIndex := strings.IndexAny(target, "#")
 	if sshParaBeginIndex == -1 {
 		return "", "", errors.New("invalid target")
 	}
-	displayName := target[:sshParaBeginIndex]
+	var displayName = target[:sshParaBeginIndex]
+	displayName = target[strings.IndexAny(displayName, ": ")+2 : sshParaBeginIndex]
 	sshPara := target[sshParaBeginIndex+1:]
 	return displayName, sshPara, nil
 }
 
 // connectTarget
 func connectTarget(target string, stderr io.Writer) (string, string, error) {
+	// sshctx DisplayName
+	if !strings.HasPrefix(target, "💻") {
+		return connectTargetWithDisplayNameOnly(target, stderr)
+	}
+
+	// sshctx 💻: DisplayName#user@host from LIST op
 	displayName, sshPara, err := extract(target)
 	if err != nil {
 		return "", "", err
 	}
-	return connectTargetWithDisplayName(displayName, sshPara, stderr)
+	return connectTargetWithDisplayNameAndSSHParameter(displayName, sshPara, stderr)
 }
 
-// connectTargetWithDisplayName
-func connectTargetWithDisplayName(displayName string, sshPara string, stderr io.Writer) (string, string, error) {
+// connectTargetWithDisplayNameOnly
+func connectTargetWithDisplayNameOnly(displayName string, stderr io.Writer) (string, string, error) {
+	sc := new(sshconfig.SSHConfig).WithLoader(sshconfig.DefaultLoader)
+
+	defer func(sshConfig *sshconfig.SSHConfig) {
+		_ = sshConfig.Close()
+	}(sc)
+
+	if err := sc.Parse(); err != nil {
+		return "", "", errors.Wrap(err, "sshconfig error")
+	}
+	var targetHost = sshconfig.EmptyHost
+	for _, h := range sc.Hosts {
+		if displayName == h.DisplayName {
+			targetHost = h
+		}
+	}
+	if targetHost == sshconfig.EmptyHost {
+		return "", "", fmt.Errorf("no config for host: %s", displayName)
+	}
+	return connectTargetWithDisplayNameAndSSHParameter(targetHost.DisplayName, targetHost.ToSSHParameter(), stderr)
+}
+
+// connectTargetWithDisplayNameAndSSHParameter actual ssh cmd
+func connectTargetWithDisplayNameAndSSHParameter(displayName string, sshPara string, stderr io.Writer) (string, string, error) {
 	_ = printer.Success(stderr, "Switched to target %s.", printer.SuccessColor.Sprint(displayName))
 
 	var waitGroup sync.WaitGroup
@@ -131,7 +161,7 @@ func connectTargetWithDisplayName(displayName string, sshPara string, stderr io.
 	return displayName, sshPara, nil
 }
 
-// connectPrevious switches to previously switch context.
+// connectPrevious switches to previously connected host.
 func connectPrevious(stderr io.Writer) (string, string, error) {
 	sc := new(sshconfig.SSHConfig).WithLoader(sshconfig.DefaultLoader)
 
@@ -147,5 +177,5 @@ func connectPrevious(stderr io.Writer) (string, string, error) {
 		return "", "", errors.New("No previous host")
 	}
 
-	return connectTargetWithDisplayName(sc.PreviousHost.DisplayName, sc.PreviousHost.ToSSHParameter(), stderr)
+	return connectTargetWithDisplayNameAndSSHParameter(sc.PreviousHost.DisplayName, sc.PreviousHost.ToSSHParameter(), stderr)
 }

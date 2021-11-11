@@ -22,13 +22,16 @@ USAGE:
 
 ```sh
 $ sshctx
-List hosts in `~/.ssh/config`
+List hosts in `~/.ssh/config`.
 
-$ sshctx 192.168.1.2
-Connect to context `192.168.1.2`.
+$ sshctx test
+Connect to host `test` in your `~/.ssh/config`.
 
 $ sshctx -
-Connect to context `192.168.1.2`.
+Connect to context `test`.
+
+$ sshctx -p
+Show the latest connected host
 ```
 
 -----
