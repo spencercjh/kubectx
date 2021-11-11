@@ -29,7 +29,7 @@ const (
 
 	// ForceColor describes the "internal" environment variable to force
 	// color usage to show current context in a list.
-	ForceColor = `_SSHCTX_FORCE_COLOR`
+	ForceColor = `SSHCTX_FORCE_COLOR`
 
 	// Debug describes the internal environment variable for more verbose logging.
 	Debug = `DEBUG`
