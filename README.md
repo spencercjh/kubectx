@@ -4,6 +4,8 @@ This repository provides `sshctx` tool.
 
 **`sshctx`** helps you switch between hosts back and forth.
 
+![sshctx demo GIF](img/sshctx-demo.gif)
+
 [Install &rarr;](#Installation)
 
 # sshctx(1)
