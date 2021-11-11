@@ -33,8 +33,14 @@ func fzfInstalled() bool {
 	return v != ""
 }
 
-// IsInteractiveMode determines if we can do choosing with fzf.
-func IsInteractiveMode(stdout *os.File) bool {
+// UseFzf determines if we can do choosing with fzf.
+func UseFzf(stdout *os.File) bool {
 	v := os.Getenv(env.FZFIgnore)
 	return v == "" && isTerminal(stdout) && fzfInstalled()
+}
+
+// UsePromptui determines if we can do choosing with promptui.
+func UsePromptui(stdout *os.File) bool {
+	v := os.Getenv(env.FZFIgnore)
+	return isTerminal(stdout) && (!fzfInstalled() || v != "")
 }
