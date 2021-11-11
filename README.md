@@ -76,11 +76,11 @@ sudo ln -s $PWD/sshctx /usr/local/bin/sshctx
 If you want `sshctx` command to present you an interactive menu with fuzzy searching, you just need
 to [install `fzf`](https://github.com/junegunn/fzf) in your `$PATH`.
 
-We will use [promptui](https://github.com/manifoldco/promptui) for interactive menu if `fzf` isn't
-installed. ([#4](https://github.com/spencercjh/sshctx/issues/4))
-
 If you have `fzf` installed, but want to opt out of using this feature, set the environment
 variable `SSHCTX_IGNORE_FZF=1`.
+
+If `fzf` isn't installed, but you still want to use `sshctx` in interactive
+mode, [promptui](https://github.com/manifoldco/promptui) provides a simple interactive mode without fuzzy searching.
 
 If you want to keep `fzf` interactive mode but need the default behavior of the command, you can do it using Unix
 composability:
