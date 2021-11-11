@@ -16,7 +16,7 @@ package env
 
 import "regexp"
 
-var SSHParameterRegexp = regexp.MustCompile(`(?m)^(\w+)@((?:1[0-9][0-9]\.|2[0-4][0-9]\.|25[0-5]\.|[1-9][0-9]\.|[0-9]\.){3}(?:1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])+|\w+[^\s]+\.[^\s]+)+:(\d+)$`)
+var SSHParameterRegexp = regexp.MustCompile(`(?m)^(\w+)@((?:1[0-9][0-9]\.|2[0-4][0-9]\.|25[0-5]\.|[1-9][0-9]\.|[0-9]\.){3}(?:1[0-9][0-9]|2[0-4][0-9]|25[0-5]|[1-9][0-9]|[0-9])+|\w+[^\s]+\.[^\s]+)+( -p (\d+))?$`)
 
 const (
 	// FZFIgnore describes the environment variable to set to disable

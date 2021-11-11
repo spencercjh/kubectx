@@ -37,6 +37,6 @@ func (op PreviousOp) Run(stdout, _ io.Writer) error {
 	if sc.PreviousHost == sshconfig.EmptyHost {
 		return errors.New("No previous host in sshctx")
 	}
-	_ = printer.Success(stdout, "Previous host: %s", sc.PreviousHost.ToSSHParameter())
+	_ = printer.Success(stdout, "Previous host: %s#%s", sc.PreviousHost.DisplayName, sc.PreviousHost.ToSSHParameter())
 	return nil
 }

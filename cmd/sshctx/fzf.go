@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/spencercjh/sshctx/internal/env"
-	"github.com/spencercjh/sshctx/internal/printer"
 	"github.com/spencercjh/sshctx/internal/sshconfig"
 	"io"
 	"os"
@@ -32,7 +31,7 @@ type InteractiveSwitchOp struct {
 	SelfCmd string
 }
 
-func (op InteractiveSwitchOp) Run(_, stderr io.Writer) error {
+func (op InteractiveSwitchOp) Run(stdout, stderr io.Writer) error {
 	// parse sshconfig just to see if it can be loaded
 	sc := new(sshconfig.SSHConfig).WithLoader(sshconfig.DefaultLoader)
 	defer func(sshConfig *sshconfig.SSHConfig) {
@@ -62,10 +61,12 @@ func (op InteractiveSwitchOp) Run(_, stderr io.Writer) error {
 	if choice == "" {
 		return errors.New("you did not choose any of the options")
 	}
-	host, err := connectTarget(choice, stderr)
+	displayName, sshPara, err := connectTarget(choice, stderr)
 	if err != nil {
 		return errors.Wrap(err, "failed to switch host")
 	}
-	_ = printer.Success(stderr, "Switched to host \"%s\".", printer.SuccessColor.Sprint(host))
+	if err := savePreviousHost(stdout, displayName, sshPara); err != nil {
+		return errors.Wrap(err, "failed to save previous host")
+	}
 	return nil
 }
